@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initCharts();
     initPredictionForm();
     initExportCSV();
+    initModalEvents();
 });
 
 // Global State
@@ -53,9 +54,11 @@ function initNavigation() {
 function initDataset() {
     const countries = ['PRT', 'GBR', 'ESP', 'FRA', 'DEU', 'ITA', 'IRL', 'USA', 'BRA', 'BEL'];
     const segments = ['Online TA', 'Offline TA/TO', 'Direct', 'Corporate', 'Groups'];
+    const channels = ['TA/TO', 'Direct', 'Corporate', 'GDS'];
     const customerTypes = ['Transient', 'Contract', 'Group', 'Transient-Party'];
     const roomTypes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
     const deposits = ['No Deposit', 'Non Refund', 'Refundable'];
+    const meals = ['BB (Bed & Breakfast)', 'HB (Half Board)', 'FB (Full Board)', 'SC (Self Catering)'];
 
     for (let i = 1; i <= 100; i++) {
         const hotel = (i % 2 === 0) ? 'Resort Hotel' : 'City Hotel';
@@ -63,39 +66,72 @@ function initDataset() {
         const leadTime = Math.floor(Math.random() * 300) + 5;
         const country = countries[Math.floor(Math.random() * countries.length)];
         const segment = segments[Math.floor(Math.random() * segments.length)];
+        const channel = channels[Math.floor(Math.random() * channels.length)];
         const customerType = customerTypes[Math.floor(Math.random() * customerTypes.length)];
         const reservedRoom = roomTypes[Math.floor(Math.random() * roomTypes.length)];
         const assignedRoom = (Math.random() < 0.15) ? 'D' : reservedRoom;
-        const adr = (Math.random() * 120 + 60).toFixed(2);
+        const adr = (Math.random() * 120 + 65).toFixed(2);
         const deposit = (leadTime > 150 && Math.random() < 0.4) ? 'Non Refund' : deposits[0];
         const status = (isCanceled === 1) ? 'Canceled' : 'Check-Out';
+        const meal = meals[Math.floor(Math.random() * meals.length)];
 
-        // Calculate risk score for demo table
+        const adults = Math.floor(Math.random() * 2) + 1;
+        const children = (Math.random() < 0.2) ? 1 : 0;
+        const babies = (Math.random() < 0.05) ? 1 : 0;
+        const weekendNights = Math.floor(Math.random() * 3);
+        const weekNights = Math.floor(Math.random() * 4) + 1;
+        const totalStay = weekendNights + weekNights;
+        const totalPrice = (adr * totalStay).toFixed(2);
+        const specialRequests = Math.floor(Math.random() * 3);
+        const parking = (Math.random() < 0.2) ? 1 : 0;
+        const agent = (segment.includes('TA')) ? `Agent #${Math.floor(Math.random() * 200) + 10}` : 'Direct Booking';
+        const company = (segment === 'Corporate') ? `Corp #${Math.floor(Math.random() * 50) + 1}` : 'N/A';
+
+        // Calculate risk score
         let risk = 'LOW';
-        if (isCanceled === 1 || leadTime > 120) risk = 'HIGH';
-        else if (leadTime > 60) risk = 'MEDIUM';
+        let riskScore = Math.floor(Math.random() * 25) + 15;
+        if (isCanceled === 1 || leadTime > 120) {
+            risk = 'HIGH';
+            riskScore = Math.floor(Math.random() * 25) + 70;
+        } else if (leadTime > 60) {
+            risk = 'MEDIUM';
+            riskScore = Math.floor(Math.random() * 25) + 40;
+        }
 
         bookingData.push({
             id: `BK-${1000 + i}`,
             hotel,
             country,
             arrivalDate: `2015-07-${(i % 28 + 1).toString().padStart(2, '0')}`,
-            stayNights: Math.floor(Math.random() * 5) + 1,
+            stayNights: totalStay,
+            weekendNights,
+            weekNights,
+            adults,
+            children,
+            babies,
             leadTime,
             reservedRoom,
             assignedRoom,
             segment,
+            channel,
             customerType,
             adr,
+            totalPrice,
             deposit,
+            meal,
+            agent,
+            company,
+            specialRequests,
+            parking,
             risk,
+            riskScore,
             status
         });
     }
 
     renderTable();
 
-    // Table Events
+    // Table Filter Events
     document.getElementById('table-search').addEventListener('input', () => { currentPage = 1; renderTable(); });
     document.getElementById('filter-status').addEventListener('change', () => { currentPage = 1; renderTable(); });
     document.getElementById('filter-customer').addEventListener('change', () => { currentPage = 1; renderTable(); });
@@ -134,27 +170,120 @@ function renderTable() {
     const end = start + pageSize;
     const pageItems = data.slice(start, end);
 
+    if (pageItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="13" class="text-center" style="padding: 24px; color: var(--text-muted);">Tidak ada data reservasi yang cocok dengan pencarian.</td></tr>`;
+        return;
+    }
+
     pageItems.forEach(row => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><strong>${row.id}</strong></td>
+            <td><strong class="clickable-id" onclick="openBookingModal('${row.id}')" style="cursor:pointer; color:var(--accent-indigo);">${row.id}</strong></td>
             <td>${row.hotel}</td>
             <td><span class="badge badge-primary">${row.country}</span></td>
             <td>${row.arrivalDate}</td>
             <td>${row.stayNights} malam</td>
             <td>${row.leadTime} hari</td>
-            <td>${row.reservedRoom} / ${row.assignedRoom} ${row.reservedRoom !== row.assignedRoom ? '<small class="text-emerald">(Upgraded)</small>' : ''}</td>
+            <td>Tipe ${row.reservedRoom} / ${row.assignedRoom} ${row.reservedRoom !== row.assignedRoom ? '<small class="text-emerald">(Upgraded)</small>' : ''}</td>
             <td>${row.segment}</td>
             <td><strong>$ ${row.adr}</strong></td>
             <td>${row.deposit}</td>
             <td><span class="badge ${row.risk === 'HIGH' ? 'badge-danger' : row.risk === 'MEDIUM' ? 'badge-warning' : 'badge-primary'}">${row.risk} RISK</span></td>
             <td><span class="status-chip ${row.status === 'Check-Out' ? 'check-out' : 'canceled'}">${row.status}</span></td>
+            <td class="text-center">
+                <button class="btn btn-sm btn-primary btn-detail" onclick="openBookingModal('${row.id}')">
+                    <i class="fa-solid fa-eye"></i> Detail
+                </button>
+            </td>
         `;
         tbody.appendChild(tr);
     });
 
-    document.getElementById('table-info').textContent = `Menampilkan ${data.length === 0 ? 0 : start + 1}-${Math.min(end, data.length)} dari ${data.length} data (Total 17,000 Dataset)`;
+    document.getElementById('table-info').textContent = `Menampilkan ${start + 1}-${Math.min(end, data.length)} dari ${data.length} data (Total 17,000 Dataset)`;
     document.getElementById('page-number').textContent = `Halaman ${currentPage}`;
+}
+
+// Modal Detail Popup Logic
+function openBookingModal(id) {
+    const record = bookingData.find(b => b.id === id);
+    if (!record) return;
+
+    // Populate Modal Header
+    document.getElementById('modal-booking-id').textContent = record.id;
+    document.getElementById('modal-hotel-name').textContent = record.hotel;
+    document.getElementById('modal-arrival-date').textContent = record.arrivalDate;
+    document.getElementById('modal-lead-time').textContent = `${record.leadTime} Hari`;
+    document.getElementById('modal-stay-duration').textContent = `${record.stayNights} Malam (${record.weekendNights} Weekend / ${record.weekNights} Weekday)`;
+
+    // Populate Status Banners
+    const statusChip = (record.status === 'Check-Out')
+        ? `<span class="status-chip check-out"><i class="fa-solid fa-check-circle"></i> Check-Out (Menginap Sukses)</span>`
+        : `<span class="status-chip canceled"><i class="fa-solid fa-circle-xmark"></i> Canceled (Reservasi Batal)</span>`;
+    document.getElementById('modal-status-badge').innerHTML = statusChip;
+
+    const riskBadgeClass = (record.risk === 'HIGH') ? 'badge-danger' : (record.risk === 'MEDIUM') ? 'badge-warning' : 'badge-primary';
+    document.getElementById('modal-risk-badge').innerHTML = `<span class="badge ${riskBadgeClass}">${record.risk} RISK (${record.riskScore}%)</span>`;
+    document.getElementById('modal-total-price').textContent = `$ ${record.totalPrice}`;
+
+    // Populate Guest & Room Details
+    document.getElementById('modal-country').textContent = `${record.country} (ISO Country Code)`;
+    document.getElementById('modal-guests-count').textContent = `${record.adults} Dewasa, ${record.children} Anak, ${record.babies} Bayi`;
+    document.getElementById('modal-room-comparison').textContent = `Dipesan: Tipe ${record.reservedRoom} / Dialokasi: Tipe ${record.assignedRoom}`;
+    document.getElementById('modal-upgrade-status').innerHTML = (record.reservedRoom !== record.assignedRoom)
+        ? `<span class="text-emerald" style="font-weight:700;"><i class="fa-solid fa-arrow-up"></i> Room Upgraded (Kamar Ditingkatkan)</span>`
+        : `Sesuai Pesanan Awal`;
+
+    // Populate Channel & Price Details
+    document.getElementById('modal-market-segment').textContent = `${record.segment} (${record.channel})`;
+    document.getElementById('modal-customer-type').textContent = record.customerType;
+    document.getElementById('modal-adr').textContent = `$ ${record.adr} / malam`;
+    document.getElementById('modal-deposit-type').textContent = record.deposit;
+
+    // Populate Requests & BI Notes
+    document.getElementById('modal-parking-req').textContent = (record.parking > 0) ? '1+ Slot Parkir Dipesan' : 'Tidak Ada Parkir';
+    document.getElementById('modal-special-req').textContent = `${record.specialRequests} Permintaan Khusus`;
+    document.getElementById('modal-meal').textContent = record.meal;
+    document.getElementById('modal-agent-company').textContent = `${record.agent} / ${record.company}`;
+
+    // Strategic BI Note
+    let biNote = '';
+    if (record.status === 'Canceled') {
+        biNote = `<i class="fa-solid fa-triangle-exclamation" style="color:var(--accent-rose);"></i> <strong>Catatan Analitik BI:</strong> Reservasi ini telah dibatalkan dengan perkiraan kerugian pendapatan senilai <strong>$${record.totalPrice}</strong>. Faktor penyebab utama: Jeda booking ${record.leadTime} hari dan jenis deposit ${record.deposit}.`;
+    } else if (record.risk === 'HIGH') {
+        biNote = `<i class="fa-solid fa-circle-info" style="color:var(--accent-amber);"></i> <strong>Catatan Analitik BI:</strong> Reservasi berisiko tinggi. Disarankan konfirmasi ulang H-7 atau penerapan DP Non-Refundable untuk menekan tingkat pembatalan.`;
+    } else {
+        biNote = `<i class="fa-solid fa-circle-check" style="color:var(--accent-emerald);"></i> <strong>Catatan Analitik BI:</strong> Reservasi sukses menginap dengan kontribusi pendapatan bersih <strong>$${record.totalPrice}</strong>. Tamu tergolong segmen potensial.`;
+    }
+    document.getElementById('modal-bi-note').innerHTML = biNote;
+
+    // Open Modal Overlay
+    document.getElementById('modal-booking-detail').classList.add('active');
+}
+
+function initModalEvents() {
+    const modal = document.getElementById('modal-booking-detail');
+    const closeBtn = document.getElementById('btn-close-modal');
+    const closeFooterBtn = document.getElementById('btn-close-modal-footer');
+    const printBtn = document.getElementById('btn-print-modal');
+
+    const closeModal = () => modal.classList.remove('active');
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (closeFooterBtn) closeFooterBtn.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
+    });
+
+    if (printBtn) {
+        printBtn.addEventListener('click', () => {
+            window.print();
+        });
+    }
 }
 
 // Chart.js Visualizations
@@ -375,13 +504,12 @@ function initPredictionForm() {
         const special = parseInt(document.getElementById('pred-special').value) || 0;
         const parking = parseInt(document.getElementById('pred-parking').value) || 0;
 
-        // Simple Decision Tree Logic Rule
-        let score = 20; // base score
+        let score = 20;
 
         if (leadTime > 150) score += 35;
         else if (leadTime > 60) score += 20;
 
-        if (deposit === 'Non Refund') score -= 30; // Non refund reduces risk
+        if (deposit === 'Non Refund') score -= 30;
         if (deposit === 'No Deposit' && leadTime > 100) score += 20;
 
         if (prevCancel > 0) score += 25;
@@ -391,7 +519,6 @@ function initPredictionForm() {
 
         score = Math.max(5, Math.min(95, score));
 
-        // Update UI
         const scoreText = document.getElementById('risk-score-text');
         const badge = document.getElementById('risk-badge');
         const circle = document.getElementById('gauge-circle');

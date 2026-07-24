@@ -228,6 +228,7 @@
                                     <th>Deposit</th>
                                     <th>Status Risk</th>
                                     <th>Status Akhir</th>
+                                    <th class="text-center">Aksi Detail</th>
                                 </tr>
                             </thead>
                             <tbody id="bookings-tbody">
@@ -576,6 +577,86 @@
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- MODAL RINCIAN DETAIL BOOKING -->
+    <div class="modal-overlay" id="modal-booking-detail">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <span class="modal-subtitle"><i class="fa-solid fa-file-invoice"></i> Rincian Transaksi Operasional Hotel</span>
+                    <h2 id="modal-booking-id">BK-1008</h2>
+                </div>
+                <button class="modal-close" id="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Top Status Cards inside Modal -->
+                <div class="modal-status-banner">
+                    <div class="status-item">
+                        <span>Status Reservasi</span>
+                        <div id="modal-status-badge"><span class="status-chip check-out">Check-Out</span></div>
+                    </div>
+                    <div class="status-item">
+                        <span>Status Risiko BI</span>
+                        <div id="modal-risk-badge"><span class="badge badge-primary">LOW RISK</span></div>
+                    </div>
+                    <div class="status-item">
+                        <span>Total Estimasi Transaksi</span>
+                        <h3 id="modal-total-price">$ 245.50</h3>
+                    </div>
+                </div>
+
+                <!-- Grid Details -->
+                <div class="modal-details-grid">
+                    <!-- Card 1: Informasi General & Hotel -->
+                    <div class="detail-card">
+                        <div class="detail-card-header"><i class="fa-solid fa-building"></i> Properti & Jadwal Kedatangan</div>
+                        <div class="detail-row"><span class="label">Nama Hotel:</span><span class="val" id="modal-hotel-name">Resort Hotel</span></div>
+                        <div class="detail-row"><span class="label">Tanggal Kedatangan:</span><span class="val" id="modal-arrival-date">2015-07-09</span></div>
+                        <div class="detail-row"><span class="label">Jeda Booking (Lead Time):</span><span class="val" id="modal-lead-time">274 hari</span></div>
+                        <div class="detail-row"><span class="label">Durasi Menginap:</span><span class="val" id="modal-stay-duration">2 Malam (0 Weekend / 2 Weekday)</span></div>
+                    </div>
+
+                    <!-- Card 2: Tamu & Alokasi Kamar -->
+                    <div class="detail-card">
+                        <div class="detail-card-header"><i class="fa-solid fa-users"></i> Profile Tamu & Alokasi Kamar</div>
+                        <div class="detail-row"><span class="label">Negara Asal:</span><span class="val" id="modal-country">GBR (United Kingdom)</span></div>
+                        <div class="detail-row"><span class="label">Komposisi Tamu:</span><span class="val" id="modal-guests-count">2 Dewasa, 0 Anak, 0 Bayi</span></div>
+                        <div class="detail-row"><span class="label">Kamar Dipesan vs Dialokasi:</span><span class="val" id="modal-room-comparison">Tipe D / Tipe D</span></div>
+                        <div class="detail-row"><span class="label">Status Upgrade Kamar:</span><span class="val" id="modal-upgrade-status">Sesuai Pesanan</span></div>
+                    </div>
+
+                    <!-- Card 3: Saluran & Ketentuan Pembayaran -->
+                    <div class="detail-card">
+                        <div class="detail-card-header"><i class="fa-solid fa-credit-card"></i> Saluran Distribusi & Biaya</div>
+                        <div class="detail-row"><span class="label">Segmen Pasar:</span><span class="val" id="modal-market-segment">Online TA</span></div>
+                        <div class="detail-row"><span class="label">Tipe Pelanggan:</span><span class="val" id="modal-customer-type">Transient</span></div>
+                        <div class="detail-row"><span class="label">Tarif Per Malam (ADR):</span><span class="val" id="modal-adr">$ 122.75 / malam</span></div>
+                        <div class="detail-row"><span class="label">Ketentuan Deposit:</span><span class="val" id="modal-deposit-type">No Deposit</span></div>
+                    </div>
+
+                    <!-- Card 4: Permintaan Khusus & Catatan BI -->
+                    <div class="detail-card">
+                        <div class="detail-card-header"><i class="fa-solid fa-concierge-bell"></i> Fasilitas & Permintaan Khusus</div>
+                        <div class="detail-row"><span class="label">Permintaan Slot Parkir:</span><span class="val" id="modal-parking-req">0 Slot Parkir</span></div>
+                        <div class="detail-row"><span class="label">Jumlah Permintaan Khusus:</span><span class="val" id="modal-special-req">1 Permintaan Khusus</span></div>
+                        <div class="detail-row"><span class="label">Paket Makanan (Meal):</span><span class="val" id="modal-meal">BB (Bed & Breakfast)</span></div>
+                        <div class="detail-row"><span class="label">Agen / Korporat:</span><span class="val" id="modal-agent-company">Agent #240</span></div>
+                    </div>
+                </div>
+
+                <!-- Strategic Business Note -->
+                <div class="modal-note-box" id="modal-bi-note">
+                    <i class="fa-solid fa-circle-info"></i> <strong>Catatan Sistem BI:</strong> Reservasi ini memiliki waktu jeda booking 274 hari dengan tarif ADR $122.75. Disarankan pengiriman konfirmasi ulang H-7 untuk memastikan kepastian kedatangan.
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="btn-print-modal"><i class="fa-solid fa-print"></i> Cetak Struk Detail</button>
+                <button class="btn btn-primary" id="btn-close-modal-footer">Tutup Rincian</button>
+            </div>
+        </div>
     </div>
 
     <!-- Script Application Logic -->
