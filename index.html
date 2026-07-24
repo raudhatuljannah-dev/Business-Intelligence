@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Booking Demand - BI Dashboard & Analytics</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-hotel"></i>
+                </div>
+                <div class="brand-text">
+                    <h2>GrandStay BI</h2>
+                    <span>Hotel Analytics System</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-tab="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard Utama</span>
+                </button>
+                <button class="nav-item" data-tab="bookings">
+                    <i class="fa-solid fa-users-rectangle"></i>
+                    <span>Data Pelanggan & Booking</span>
+                </button>
+                <button class="nav-item" data-tab="rooms">
+                    <i class="fa-solid fa-bed"></i>
+                    <span>Data Ruangan & Tipe</span>
+                </button>
+                <button class="nav-item" data-tab="prediction">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>Data Mining (Prediksi)</span>
+                </button>
+                <button class="nav-item" data-tab="clustering">
+                    <i class="fa-solid fa-diagram-project"></i>
+                    <span>Clustering Tamu</span>
+                </button>
+                <button class="nav-item" data-tab="reports">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                    <span>Reporting Services</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <img src="https://ui-avatars.com/api/?name=Admin+Hotel&background=6366f1&color=fff" alt="User Avatar">
+                    <div class="user-info">
+                        <h4>Manager BI</h4>
+                        <span>Administrator</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Navbar -->
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h1 id="page-title">Dashboard Utama Business Intelligence</h1>
+                    <p id="page-subtitle">Ringkasan Performa Reservasi Hotel & Analisis Data</p>
+                </div>
+                <div class="topbar-controls">
+                    <div class="filter-group">
+                        <i class="fa-solid fa-building-user"></i>
+                        <select id="hotel-filter">
+                            <option value="ALL">Semua Hotel (17,000 Data)</option>
+                            <option value="Resort Hotel">Resort Hotel</option>
+                            <option value="City Hotel">City Hotel</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-outline" id="btn-refresh">
+                        <i class="fa-solid fa-arrows-rotate"></i> Reload Data
+                    </button>
+                    <button class="btn btn-primary" id="btn-export-quick">
+                        <i class="fa-solid fa-download"></i> Ekspor Laporan
+                    </button>
+                </div>
+            </header>
+
+            <!-- TAB 1: EXECUTIVE DASHBOARD -->
+            <section class="tab-content active" id="tab-dashboard">
+                <!-- Metrics Summary Cards -->
+                <div class="metrics-grid">
+                    <div class="metric-card glass glow-indigo">
+                        <div class="metric-icon"><i class="fa-solid fa-wallet"></i></div>
+                        <div class="metric-data">
+                            <span>Total Gross Revenue</span>
+                            <h3 id="stat-revenue">Rp 18.450.000.000</h3>
+                            <div class="metric-trend positive">
+                                <i class="fa-solid fa-arrow-trend-up"></i> +14.2% bulan ini
+                            </div>
+                        </div>
+                    </div>
+                    <div class="metric-card glass glow-cyan">
+                        <div class="metric-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                        <div class="metric-data">
+                            <span>Total Reservasi</span>
+                            <h3 id="stat-bookings">17,000</h3>
+                            <div class="metric-trend neutral">
+                                <i class="fa-solid fa-database"></i> Live Dataset
+                            </div>
+                        </div>
+                    </div>
+                    <div class="metric-card glass glow-amber">
+                        <div class="metric-icon"><i class="fa-solid fa-tag"></i></div>
+                        <div class="metric-data">
+                            <span>Avg Daily Rate (ADR)</span>
+                            <h3 id="stat-adr">$ 101.83</h3>
+                            <div class="metric-trend positive">
+                                <i class="fa-solid fa-arrow-trend-up"></i> Tarif kamar ideal
+                            </div>
+                        </div>
+                    </div>
+                    <div class="metric-card glass glow-rose">
+                        <div class="metric-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+                        <div class="metric-data">
+                            <span>Cancellation Rate</span>
+                            <h3 id="stat-cancel-rate">37.1%</h3>
+                            <div class="metric-trend negative">
+                                <i class="fa-solid fa-arrow-trend-down"></i> Perlu mitigasi
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section Row 1 -->
+                <div class="charts-grid two-cols">
+                    <div class="chart-card glass">
+                        <div class="chart-header">
+                            <h3><i class="fa-solid fa-chart-line"></i> Tren Pendapatan & Kedatangan Tamu</h3>
+                            <div class="chart-badge">Tahun 2015 - 2017</div>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="chart-revenue-trend"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card glass">
+                        <div class="chart-header">
+                            <h3><i class="fa-solid fa-pie-chart"></i> Segmen Pasar Pemesanan (Market Segment)</h3>
+                            <div class="chart-badge">Saluran Distribusi</div>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="chart-market-segment"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section Row 2 -->
+                <div class="charts-grid three-cols">
+                    <div class="chart-card glass">
+                        <div class="chart-header">
+                            <h3><i class="fa-solid fa-hospitality"></i> Status Reservasi</h3>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="chart-status-pie"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card glass">
+                        <div class="chart-header">
+                            <h3><i class="fa-solid fa-utensils"></i> Paket Makanan (Meal Option)</h3>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="chart-meal-distribution"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card glass">
+                        <div class="chart-header">
+                            <h3><i class="fa-solid fa-globe"></i> Top 5 Asal Negara Tamu</h3>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="chart-country-bar"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: DATA PELANGGAN & BOOKING -->
+            <section class="tab-content" id="tab-bookings">
+                <div class="table-container glass">
+                    <div class="table-header">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="table-search" placeholder="Cari ID Booking, Negara, Tipe Kamar, Status...">
+                        </div>
+                        <div class="table-actions">
+                            <select id="filter-status">
+                                <option value="ALL">Semua Status</option>
+                                <option value="Check-Out">Check-Out</option>
+                                <option value="Canceled">Canceled</option>
+                            </select>
+                            <select id="filter-customer">
+                                <option value="ALL">Semua Tipe Tamu</option>
+                                <option value="Transient">Transient</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Group">Group</option>
+                                <option value="Transient-Party">Transient-Party</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="data-table" id="bookings-table">
+                            <thead>
+                                <tr>
+                                    <th>ID Booking</th>
+                                    <th>Hotel</th>
+                                    <th>Negara</th>
+                                    <th>Tgl Kedatangan</th>
+                                    <th>Lama Menginap</th>
+                                    <th>Jeda (Lead Time)</th>
+                                    <th>Tipe Kamar (Pesan/Dapat)</th>
+                                    <th>Segmen Pasar</th>
+                                    <th>ADR ($)</th>
+                                    <th>Deposit</th>
+                                    <th>Status Risk</th>
+                                    <th>Status Akhir</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bookings-tbody">
+                                <!-- Loaded dynamically by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-footer">
+                        <div class="table-info" id="table-info">Menampilkan 1-10 dari 17,000 data</div>
+                        <div class="pagination">
+                            <button id="btn-prev" class="btn-page"><i class="fa-solid fa-chevron-left"></i> Prev</button>
+                            <span id="page-number">Halaman 1</span>
+                            <button id="btn-next" class="btn-page">Next <i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: DATA RUANGAN & TIPE KAMAR -->
+            <section class="tab-content" id="tab-rooms">
+                <div class="room-stats-grid">
+                    <div class="metric-card glass glow-indigo">
+                        <div class="metric-icon"><i class="fa-solid fa-door-open"></i></div>
+                        <div class="metric-data">
+                            <span>Tipe Kamar Paling Populer</span>
+                            <h3>Kamar Tipe A</h3>
+                            <span>73.2% dari Total Pemesanan</span>
+                        </div>
+                    </div>
+                    <div class="metric-card glass glow-emerald">
+                        <div class="metric-icon"><i class="fa-solid fa-arrow-up-right-dots"></i></div>
+                        <div class="metric-data">
+                            <span>Rasio Upgrade Kamar</span>
+                            <h3>12.4% Tamu</h3>
+                            <span>Mendapatkan alokasi kamar lebih tinggi</span>
+                        </div>
+                    </div>
+                    <div class="metric-card glass glow-amber">
+                        <div class="metric-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                        <div class="metric-data">
+                            <span>ADR Kamar Premium</span>
+                            <h3>$ 178.50</h3>
+                            <span>Kamar Tipe G / H</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid two-cols mt-4">
+                    <div class="chart-card glass">
+                        <div class="chart-header">
+                            <h3><i class="fa-solid fa-bed"></i> Distribusi Tipe Kamar Dipesan (Reserved vs Assigned)</h3>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="chart-room-comparison"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card glass">
+                        <div class="chart-header">
+                            <h3><i class="fa-solid fa-dollar-sign"></i> Rata-rata Tarif (ADR) per Tipe Kamar</h3>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="chart-room-adr"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Room Types Table -->
+                <div class="table-container glass mt-4">
+                    <div class="table-header">
+                        <h3>Detail Spesifikasi & Kategori Kamar Hotel</h3>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Kode Kamar</th>
+                                <th>Kategori / Fasilitas</th>
+                                <th>Total Dipesan</th>
+                                <th>Total Dialokasikan</th>
+                                <th>Rata-rata ADR</th>
+                                <th>Status Kamar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge badge-primary">Tipe A</span></td>
+                                <td>Standard Single/Double Room</td>
+                                <td>12,450 booking</td>
+                                <td>11,800 booking</td>
+                                <td>$ 89.50</td>
+                                <td><span class="status-chip check-out">Optimal</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-primary">Tipe D</span></td>
+                                <td>Superior Double Room + Balcony</td>
+                                <td>2,800 booking</td>
+                                <td>3,100 booking</td>
+                                <td>$ 115.00</td>
+                                <td><span class="status-chip check-out">Optimal</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-primary">Tipe E</span></td>
+                                <td>Deluxe Family Suite</td>
+                                <td>950 booking</td>
+                                <td>1,020 booking</td>
+                                <td>$ 138.20</td>
+                                <td><span class="status-chip check-out">Tinggi</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-primary">Tipe G</span></td>
+                                <td>Executive Presidential Suite</td>
+                                <td>420 booking</td>
+                                <td>480 booking</td>
+                                <td>$ 195.00</td>
+                                <td><span class="status-chip canceled">Terbatas</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TAB 4: PREDIKSI PEMBATALAN (DATA MINING) -->
+            <section class="tab-content" id="tab-prediction">
+                <div class="prediction-grid">
+                    <div class="card glass prediction-form-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-robot"></i> Form Simulation Data Mining (Decision Tree Evaluator)</h3>
+                            <p>Masukkan atribut reservasi baru untuk memprediksi probabilitas pembatalan pesanan.</p>
+                        </div>
+                        <form id="prediction-form" class="form-grid">
+                            <div class="form-group">
+                                <label>Waktu Jeda Booking (Lead Time / Hari)</label>
+                                <input type="number" id="pred-leadtime" value="120" min="0" max="800">
+                            </div>
+                            <div class="form-group">
+                                <label>Jenis Deposit</label>
+                                <select id="pred-deposit">
+                                    <option value="No Deposit">No Deposit</option>
+                                    <option value="Non Refund">Non Refund</option>
+                                    <option value="Refundable">Refundable</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Segmen Pasar (Market Segment)</label>
+                                <select id="pred-segment">
+                                    <option value="Online TA">Online TA (Travel Agent)</option>
+                                    <option value="Offline TA/TO">Offline TA/TO</option>
+                                    <option value="Direct">Direct Booking</option>
+                                    <option value="Corporate">Corporate</option>
+                                    <option value="Groups">Groups</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Riwayat Pembatalan Sebelum (Previous Cancellation)</label>
+                                <input type="number" id="pred-prevcancel" value="0" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Jumlah Permintaan Khusus (Special Requests)</label>
+                                <input type="number" id="pred-special" value="0" min="0" max="5">
+                            </div>
+                            <div class="form-group">
+                                <label>Permintaan Slot Parkir (Car Parking)</label>
+                                <select id="pred-parking">
+                                    <option value="0">Tidak Ada (0)</option>
+                                    <option value="1">Ada Slot Parkir (1+)</option>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Jalankan Evaluasi Prediksi
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card glass prediction-result-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-chart-radar"></i> Hasil Evaluasi Prediksi Risiko</h3>
+                        </div>
+                        <div class="result-body" id="prediction-result-body">
+                            <div class="risk-gauge" id="risk-gauge">
+                                <div class="gauge-circle" id="gauge-circle">
+                                    <span id="risk-score-text">68%</span>
+                                    <small>Risk Score</small>
+                                </div>
+                            </div>
+                            <div class="risk-status-badge" id="risk-badge">MEDIUM RISK CANCELLATION</div>
+                            <p class="risk-description" id="risk-desc">
+                                Reservasi memiliki probabilitas sedang untuk dibatalkan karena waktu jeda booking cukup tinggi (120 hari) tanpa adanya deposit uang muka.
+                            </p>
+                            <div class="recommendation-box" id="risk-recommendation">
+                                <strong><i class="fa-solid fa-lightbulb"></i> Rekomendasi Sistem BI:</strong>
+                                <ul>
+                                    <li>Kirimkan email konfirmasi reminder 14 hari sebelum kedatangan.</li>
+                                    <li>Tawarkan diskon prepayment jika pembayaran dilakukan H-7.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: CLUSTERING TAMU -->
+            <section class="tab-content" id="tab-clustering">
+                <div class="cluster-cards-grid">
+                    <div class="cluster-card glass border-indigo">
+                        <div class="cluster-header">
+                            <span class="cluster-tag tag-indigo">Cluster 1</span>
+                            <h3>High-Value Vacationers</h3>
+                        </div>
+                        <div class="cluster-stats">
+                            <div><strong>Lead Time:</strong> Panjang (> 90 hari)</div>
+                            <div><strong>Rata-rata ADR:</strong> $ 145.50</div>
+                            <div><strong>Lama Menginap:</strong> 4 - 7 Malam</div>
+                            <div><strong>Pola Pemesanan:</strong> Online TA / Resort Hotel</div>
+                        </div>
+                        <div class="cluster-strategy">
+                            <strong>Strategi Bisnis:</strong> Berikan penawaran paket kamar eksklusif + voucher dinner / spa untuk menjaga loyalitas.
+                        </div>
+                    </div>
+
+                    <div class="cluster-card glass border-emerald">
+                        <div class="cluster-header">
+                            <span class="cluster-tag tag-emerald">Cluster 2</span>
+                            <h3>Corporate & Business Stay</h3>
+                        </div>
+                        <div class="cluster-stats">
+                            <div><strong>Lead Time:</strong> Singkat (< 14 hari)</div>
+                            <div><strong>Rata-rata ADR:</strong> $ 98.00</div>
+                            <div><strong>Lama Menginap:</strong> 1 - 2 Malam (Weekday)</div>
+                            <div><strong>Pola Pemesanan:</strong> Corporate / Direct</div>
+                        </div>
+                        <div class="cluster-strategy">
+                            <strong>Strategi Bisnis:</strong> Layanan express check-in, wifi prioritas, dan fleksibilitas reschedule jadwal bisnis.
+                        </div>
+                    </div>
+
+                    <div class="cluster-card glass border-rose">
+                        <div class="cluster-header">
+                            <span class="cluster-tag tag-rose">Cluster 3</span>
+                            <h3>Budget & High-Risk Bookers</h3>
+                        </div>
+                        <div class="cluster-stats">
+                            <div><strong>Lead Time:</strong> Sangat Panjang (> 180 hari)</div>
+                            <div><strong>Rata-rata ADR:</strong> $ 72.00</div>
+                            <div><strong>Lama Menginap:</strong> Variatif</div>
+                            <div><strong>Pola Pemesanan:</strong> Groups / Offline TA</div>
+                        </div>
+                        <div class="cluster-strategy">
+                            <strong>Strategi Bisnis:</strong> Terapkan syarat Non-Refundable deposit untuk mengurangi potensi kerugian akibat pembatalan.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card glass mt-4">
+                    <div class="chart-header">
+                        <h3><i class="fa-solid fa-circle-nodes"></i> Scatter Plot Visualisasi K-Means Clustering (ADR vs Lead Time)</h3>
+                    </div>
+                    <div class="chart-body" style="height: 380px;">
+                        <canvas id="chart-clustering-scatter"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 6: REPORTING SERVICES -->
+            <section class="tab-content" id="tab-reports">
+                <div class="report-box glass">
+                    <div class="report-header">
+                        <div class="report-title">
+                            <h2><i class="fa-solid fa-print"></i> Laporan Eksekutif Business Intelligence</h2>
+                            <p>Modul Pencetakan & Ekspor Laporan Otomatis (SSRS Web Generator)</p>
+                        </div>
+                        <div class="report-buttons">
+                            <button class="btn btn-outline" onclick="window.print()"><i class="fa-solid fa-print"></i> Cetak Laporan</button>
+                            <button class="btn btn-emerald" id="btn-export-csv"><i class="fa-solid fa-file-csv"></i> Download CSV Data</button>
+                        </div>
+                    </div>
+
+                    <div class="report-summary-grid">
+                        <div class="summary-box">
+                            <h4>Ringkasan Revenue</h4>
+                            <p class="val">Rp 18.450.000.000</p>
+                            <small>Resort + City Hotel</small>
+                        </div>
+                        <div class="summary-box">
+                            <h4>Total Kamar Dipesan</h4>
+                            <p class="val">17,000 Transaksi</p>
+                            <small>Dataset Hotel Demand</small>
+                        </div>
+                        <div class="summary-box">
+                            <h4>Total Potensi Loss (Batal)</h4>
+                            <p class="val text-rose">Rp 6.840.000.000</p>
+                            <small>6,307 Transaksi Batal</small>
+                        </div>
+                    </div>
+
+                    <div class="report-table-section mt-4">
+                        <h3>Katalog Laporan Kinerja Saluran Distribusi (Distribution Channel Metrics)</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Saluran Distribusi</th>
+                                    <th>Total Booking</th>
+                                    <th>Jumlah Check-Out</th>
+                                    <th>Jumlah Batal</th>
+                                    <th>Cancellation Rate</th>
+                                    <th>Total Gross Revenue ($)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Online TA (Travel Agent)</strong></td>
+                                    <td>9,650</td>
+                                    <td>5,820</td>
+                                    <td>3,830</td>
+                                    <td><span class="text-rose">39.69%</span></td>
+                                    <td>$ 1,120,450.00</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Offline TA/TO</strong></td>
+                                    <td>3,420</td>
+                                    <td>2,240</td>
+                                    <td>1,180</td>
+                                    <td><span class="text-amber">34.50%</span></td>
+                                    <td>$ 380,200.00</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Direct Booking</strong></td>
+                                    <td>2,150</td>
+                                    <td>1,820</td>
+                                    <td>330</td>
+                                    <td><span class="text-emerald">15.35%</span></td>
+                                    <td>$ 245,800.00</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Corporate</strong></td>
+                                    <td>1,580</td>
+                                    <td>1,390</td>
+                                    <td>190</td>
+                                    <td><span class="text-emerald">12.02%</span></td>
+                                    <td>$ 165,400.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Script Application Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
